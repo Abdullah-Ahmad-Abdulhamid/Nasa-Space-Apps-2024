@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG Circular</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --c1:#E5243B; --c2:#DDA63A; --c3:#4C9F38; --c4:#C5192D; --c5:#FF3A21;
+            --c6:#26BDE2; --c7:#FCC30B; --c8:#A21942; --c9:#FD6925; --c10:#DD1367;
+            --c11:#FD9D24; --c12:#BF8B2E; --c13:#3F7E44; --c14:#0A97D9; --c15:#56C02B;
+            --c16:#00689D; --c17:#19486A;
+            --bg: #07090f;
+            --surface: rgba(255,255,255,0.04);
+            --text: #f0f0f0;
+            --muted: rgba(255,255,255,0.4);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* ── Deep space background ── */
+        .bg-canvas {
+            position: fixed; inset: 0; z-index: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 50% 50%, rgba(26,60,100,0.35) 0%, transparent 70%),
+                radial-gradient(ellipse 40% 40% at 20% 80%, rgba(76,159,56,0.12) 0%, transparent 60%),
+                radial-gradient(ellipse 40% 40% at 80% 20%, rgba(229,36,59,0.10) 0%, transparent 60%),
+                var(--bg);
+        }
+
+        /* Animated grain */
+        .bg-canvas::after {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* SDG color stripe */
+        .color-stripe {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 5px; z-index: 200;
+            background: linear-gradient(90deg,
+                #E5243B 5.88%,#DDA63A 11.76%,#4C9F38 17.64%,#C5192D 23.52%,
+                #FF3A21 29.4%,#26BDE2 35.28%,#FCC30B 41.16%,#A21942 47.04%,
+                #FD6925 52.92%,#DD1367 58.8%,#FD9D24 64.68%,#BF8B2E 70.56%,
+                #3F7E44 76.44%,#0A97D9 82.32%,#56C02B 88.2%,#00689D 94.08%,#19486A 100%);
+            animation: shimmer 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes shimmer { from{filter:brightness(1)} to{filter:brightness(1.4)} }
+
+        /* ── Layout ── */
+        .scene {
+            position: relative; z-index: 1;
+            width: 100%; height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0;
+        }
+
+        /* ── Left panel ── */
+        .left-panel {
+            position: absolute;
+            left: 5vw; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column;
+            gap: 6px;
+            animation: fadeLeft 1s ease 0.2s both;
+        }
+
+        @keyframes fadeLeft { from{opacity:0;transform:translateY(-50%) translateX(-30px)} to{opacity:1;transform:translateY(-50%) translateX(0)} }
+
+        .un-pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 100px;
+            padding: 5px 14px;
+            font-size: 10px; letter-spacing: 2.5px;
+            text-transform: uppercase; color: var(--muted);
+            margin-bottom: 4px;
+        }
+
+        .un-pill span { color: #26BDE2; }
+
+        .main-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(38px, 5vw, 68px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            background: linear-gradient(160deg, #fff 0%, rgba(255,255,255,0.5) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .main-sub {
+            font-size: 13px;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 220px;
+            margin-top: 8px;
+        }
+
+        /* Quiz link */
+        .quiz-link {
+            display: inline-flex; align-items: center; gap: 8px;
+            margin-top: 24px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: var(--text);
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px; font-weight: 500;
+            transition: all 0.25s;
+            width: fit-content;
+        }
+
+        .quiz-link:hover {
+            background: rgba(38,189,226,0.12);
+            border-color: #26BDE2;
+            color: #26BDE2;
+            transform: translateX(4px);
+        }
+
+        .quiz-link .arrow { transition: transform 0.2s; }
+        .quiz-link:hover .arrow { transform: translateX(3px); }
+
+        /* ── Orbit / Circle ── */
+        .orbit-wrap {
+            position: relative;
+            width: min(580px, 90vmin);
+            height: min(580px, 90vmin);
+            animation: fadeIn 1s ease 0.4s both;
+        }
+
+        @keyframes fadeIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+
+        /* Slow-spin orbit ring */
+        .orbit-ring {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.06);
+            animation: spinRing 60s linear infinite;
+        }
+
+        .orbit-ring::before {
+            content: '';
+            position: absolute; inset: -1px;
+            border-radius: 50%;
+            border: 1px dashed rgba(255,255,255,0.04);
+        }
+
+        @keyframes spinRing { to { transform: rotate(360deg); } }
+
+        /* Glow behind globe */
+        .globe-glow {
+            position: absolute; inset: 0;
+            border-radius: 50%;
+            background: radial-gradient(circle at center,
+                rgba(38,189,226,0.15) 0%,
+                rgba(76,159,56,0.08) 30%,
+                transparent 65%);
+            animation: pulseGlow 4s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            from { opacity: 0.6; transform: scale(0.95); }
+            to   { opacity: 1;   transform: scale(1.05); }
+        }
+
+        /* Centre globe */
+        .globe-center {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 30%;
+            height: 30%;
+            border-radius: 50%;
+            background:
+                radial-gradient(circle at 35% 35%, rgba(255,255,255,0.25), transparent 60%),
+                url("https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Earth_Eastern_Hemisphere.jpg/1200px-Earth_Eastern_Hemisphere.jpg") center/cover;
+            box-shadow:
+                0 0 40px rgba(38,189,226,0.3),
+                0 0 80px rgba(38,189,226,0.1),
+                inset 0 0 20px rgba(0,0,0,0.4);
+            z-index: 2;
+        }
+
+        /* SDG label in center */
+        .center-label {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .center-label .big { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: rgba(255,255,255,0.9); }
+        .center-label .small { font-size: 9px; letter-spacing: 2px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
+
+        /* ── SDG buttons ── */
+        .sdg {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 52px; height: 52px;
+            margin: -26px 0 0 -26px;
+            border-radius: 50%;
+            color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            z-index: 10;
+            transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), box-shadow 0.3s, filter 0.3s;
+            cursor: pointer;
+        }
+
+        /* tooltip */
+        .sdg::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: rgba(10,10,20,0.92);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            padding: 5px 10px;
+            border-radius: 6px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s, transform 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            z-index: 999;
+        }
+
+        .sdg:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .sdg:hover {
+            filter: brightness(1.25) saturate(1.2);
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.12), 0 8px 24px rgba(0,0,0,0.4);
+            z-index: 20;
+        }
+
+        /* Positions — 17 nodes evenly spaced */
+        .sdg1  { transform:rotate(0deg)   translateX(260px) rotate(0deg);   background:var(--c1); }
+        .sdg2  { transform:rotate(21deg)  translateX(260px) rotate(-21deg);  background:var(--c2); }
+        .sdg3  { transform:rotate(42deg)  translateX(260px) rotate(-42deg);  background:var(--c3); }
+        .sdg4  { transform:rotate(63deg)  translateX(260px) rotate(-63deg);  background:var(--c4); }
+        .sdg5  { transform:rotate(84deg)  translateX(260px) rotate(-84deg);  background:var(--c5); }
+        .sdg6  { transform:rotate(105deg) translateX(260px) rotate(-105deg); background:var(--c6); }
+        .sdg7  { transform:rotate(126deg) translateX(260px) rotate(-126deg); background:var(--c7); color:#222; }
+        .sdg8  { transform:rotate(147deg) translateX(260px) rotate(-147deg); background:var(--c8); }
+        .sdg9  { transform:rotate(168deg) translateX(260px) rotate(-168deg); background:var(--c9); }
+        .sdg10 { transform:rotate(189deg) translateX(260px) rotate(-189deg); background:var(--c10); }
+        .sdg11 { transform:rotate(210deg) translateX(260px) rotate(-210deg); background:var(--c11); }
+        .sdg12 { transform:rotate(231deg) translateX(260px) rotate(-231deg); background:var(--c12); }
+        .sdg13 { transform:rotate(252deg) translateX(260px) rotate(-252deg); background:var(--c13); }
+        .sdg14 { transform:rotate(273deg) translateX(260px) rotate(-273deg); background:var(--c14); }
+        .sdg15 { transform:rotate(294deg) translateX(260px) rotate(-294deg); background:var(--c15); }
+        .sdg16 { transform:rotate(315deg) translateX(260px) rotate(-315deg); background:var(--c16); }
+        .sdg17 { transform:rotate(336deg) translateX(260px) rotate(-336deg); background:var(--c17); }
+
+        /* Click ripple */
+        .sdg.clicked {
+            animation: rippleClick 0.6s ease forwards;
+        }
+
+        @keyframes rippleClick {
+            0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.4); }
+            100% { box-shadow: 0 0 0 24px rgba(255,255,255,0); }
+        }
+
+        /* Staggered entry animation */
+        .sdg { opacity: 0; animation: nodeIn 0.5s ease forwards; }
+        .sdg1  { animation-delay: 0.1s; }
+        .sdg2  { animation-delay: 0.15s; }
+        .sdg3  { animation-delay: 0.20s; }
+        .sdg4  { animation-delay: 0.25s; }
+        .sdg5  { animation-delay: 0.30s; }
+        .sdg6  { animation-delay: 0.35s; }
+        .sdg7  { animation-delay: 0.40s; }
+        .sdg8  { animation-delay: 0.45s; }
+        .sdg9  { animation-delay: 0.50s; }
+        .sdg10 { animation-delay: 0.55s; }
+        .sdg11 { animation-delay: 0.60s; }
+        .sdg12 { animation-delay: 0.65s; }
+        .sdg13 { animation-delay: 0.70s; }
+        .sdg14 { animation-delay: 0.75s; }
+        .sdg15 { animation-delay: 0.80s; }
+        .sdg16 { animation-delay: 0.85s; }
+        .sdg17 { animation-delay: 0.90s; }
+
+        @keyframes nodeIn {
+            from { opacity:0; }
+            to   { opacity:1; }
+        }
+
+        /* ── Info tooltip panel (bottom) ── */
+        .info-bar {
+            position: fixed;
+            bottom: 28px; left: 50%;
+            transform: translateX(-50%);
+            background: rgba(10,10,20,0.85);
+            border: 1px solid rgba(255,255,255,0.1);
+            backdrop-filter: blur(16px);
+            border-radius: 14px;
+            padding: 12px 24px;
+            display: flex; align-items: center; gap: 14px;
+            font-size: 13px; color: var(--muted);
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(8px);
+            min-width: 280px;
+            max-width: 90vw;
+        }
+
+        .info-bar.visible {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .info-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .info-num { font-family:'Bebas Neue',sans-serif; font-size:20px; color:#fff; }
+        .info-name { color: var(--text); font-weight: 500; }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .left-panel { display: none; }
+            .orbit-wrap { width: min(92vw, 92vmin); height: min(92vw, 92vmin); }
+            .sdg1,.sdg2,.sdg3,.sdg4,.sdg5,.sdg6,.sdg7,.sdg8,.sdg9,
+            .sdg10,.sdg11,.sdg12,.sdg13,.sdg14,.sdg15,.sdg16,.sdg17 {
+                width: 44px; height: 44px; margin: -22px 0 0 -22px; font-size:12px;
+            }
+            .sdg1  { transform:rotate(0deg)   translateX(42vmin) rotate(0deg); }
+            .sdg2  { transform:rotate(21deg)  translateX(42vmin) rotate(-21deg); }
+            .sdg3  { transform:rotate(42deg)  translateX(42vmin) rotate(-42deg); }
+            .sdg4  { transform:rotate(63deg)  translateX(42vmin) rotate(-63deg); }
+            .sdg5  { transform:rotate(84deg)  translateX(42vmin) rotate(-84deg); }
+            .sdg6  { transform:rotate(105deg) translateX(42vmin) rotate(-105deg); }
+            .sdg7  { transform:rotate(126deg) translateX(42vmin) rotate(-126deg); }
+            .sdg8  { transform:rotate(147deg) translateX(42vmin) rotate(-147deg); }
+            .sdg9  { transform:rotate(168deg) translateX(42vmin) rotate(-168deg); }
+            .sdg10 { transform:rotate(189deg) translateX(42vmin) rotate(-189deg); }
+            .sdg11 { transform:rotate(210deg) translateX(42vmin) rotate(-210deg); }
+            .sdg12 { transform:rotate(231deg) translateX(42vmin) rotate(-231deg); }
+            .sdg13 { transform:rotate(252deg) translateX(42vmin) rotate(-252deg); }
+            .sdg14 { transform:rotate(273deg) translateX(42vmin) rotate(-273deg); }
+            .sdg15 { transform:rotate(294deg) translateX(42vmin) rotate(-294deg); }
+            .sdg16 { transform:rotate(315deg) translateX(42vmin) rotate(-315deg); }
+            .sdg17 { transform:rotate(336deg) translateX(42vmin) rotate(-336deg); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="color-stripe"></div>
+<div class="bg-canvas"></div>
+
+<div class="scene">
+
+    <!-- Left Panel -->
+    <div class="left-panel">
+        <div class="un-pill">🌍 <span>United Nations</span></div>
+        <h1 class="main-title">Sustainable<br>Development<br>Goals</h1>
+        <p class="main-sub">17 goals. One planet. A global agenda for people, prosperity, and peace by 2030.</p>
+        <a href="quiz.html" class="quiz-link">
+            Take the SDGs Quiz
+            <span class="arrow">→</span>
+        </a>
+    </div>
+
+    <!-- Orbit -->
+    <div class="orbit-wrap">
+        <div class="orbit-ring"></div>
+        <div class="globe-glow"></div>
+        <div class="globe-center"></div>
+
+        <div class="center-label">
+            <div class="big">SDG</div>
+            <div class="small">2030 Agenda</div>
+        </div>
+
+        <a href="sdg1.html"  class="sdg sdg1"  data-num="1"  data-color="#E5243B" data-name="No Poverty"                aria-label="SDG 1">1</a>
+        <a href="sdg2.html"  class="sdg sdg2"  data-num="2"  data-color="#DDA63A" data-name="Zero Hunger"               aria-label="SDG 2">2</a>
+        <a href="sdg3.html"  class="sdg sdg3"  data-num="3"  data-color="#4C9F38" data-name="Good Health & Well-being"  aria-label="SDG 3">3</a>
+        <a href="sdg4.html"  class="sdg sdg4"  data-num="4"  data-color="#C5192D" data-name="Quality Education"         aria-label="SDG 4">4</a>
+        <a href="sdg5.html"  class="sdg sdg5"  data-num="5"  data-color="#FF3A21" data-name="Gender Equality"           aria-label="SDG 5">5</a>
+        <a href="sdg6.html"  class="sdg sdg6"  data-num="6"  data-color="#26BDE2" data-name="Clean Water & Sanitation"  aria-label="SDG 6">6</a>
+        <a href="sdg7.html"  class="sdg sdg7"  data-num="7"  data-color="#FCC30B" data-name="Affordable Clean Energy"   aria-label="SDG 7">7</a>
+        <a href="sdg8.html"  class="sdg sdg8"  data-num="8"  data-color="#A21942" data-name="Decent Work & Growth"      aria-label="SDG 8">8</a>
+        <a href="sdg9.html"  class="sdg sdg9"  data-num="9"  data-color="#FD6925" data-name="Industry & Innovation"     aria-label="SDG 9">9</a>
+        <a href="sdg10.html" class="sdg sdg10" data-num="10" data-color="#DD1367" data-name="Reduced Inequalities"      aria-label="SDG 10">10</a>
+        <a href="sdg11.html" class="sdg sdg11" data-num="11" data-color="#FD9D24" data-name="Sustainable Cities"        aria-label="SDG 11">11</a>
+        <a href="sdg12.html" class="sdg sdg12" data-num="12" data-color="#BF8B2E" data-name="Responsible Consumption"   aria-label="SDG 12">12</a>
+        <a href="sdg13.html" class="sdg sdg13" data-num="13" data-color="#3F7E44" data-name="Climate Action"            aria-label="SDG 13">13</a>
+        <a href="sdg14.html" class="sdg sdg14" data-num="14" data-color="#0A97D9" data-name="Life Below Water"          aria-label="SDG 14">14</a>
+        <a href="sdg15.html" class="sdg sdg15" data-num="15" data-color="#56C02B" data-name="Life on Land"              aria-label="SDG 15">15</a>
+        <a href="sdg16.html" class="sdg sdg16" data-num="16" data-color="#00689D" data-name="Peace & Justice"           aria-label="SDG 16">16</a>
+        <a href="sdg17.html" class="sdg sdg17" data-num="17" data-color="#19486A" data-name="Partnerships for Goals"    aria-label="SDG 17">17</a>
+    </div>
+
+</div>
+
+<!-- Info bar at bottom -->
+<div class="info-bar" id="infoBar">
+    <div class="info-dot" id="infoDot"></div>
+    <div class="info-num" id="infoNum"></div>
+    <div>
+        <div class="info-name" id="infoName"></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Click to explore →</div>
+    </div>
+</div>
+
+<script>
+    const sdgs = document.querySelectorAll('.sdg');
+    const infoBar = document.getElementById('infoBar');
+    const infoDot = document.getElementById('infoDot');
+    const infoNum = document.getElementById('infoNum');
+    const infoName = document.getElementById('infoName');
+    let hideTimer;
+
+    sdgs.forEach(el => {
+        el.addEventListener('mouseenter', () => {
+            clearTimeout(hideTimer);
+            infoDot.style.background = el.dataset.color;
+            infoNum.textContent = 'SDG ' + el.dataset.num;
+            infoName.textContent = el.dataset.name;
+            infoBar.classList.add('visible');
+        });
+
+        el.addEventListener('mouseleave', () => {
+            hideTimer = setTimeout(() => infoBar.classList.remove('visible'), 600);
+        });
+
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
+            this.classList.add('clicked');
+            const href = this.getAttribute('href');
+            setTimeout(() => { window.location.href = href; }, 700);
+        });
+    });
+</script>
+</body>
+</html>

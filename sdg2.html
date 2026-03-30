@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDG 2: Zero Hunger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sdg: #DDA63A;
+            --sdg-dim: rgba(221,166,58,0.12);
+            --sdg-glow: rgba(221,166,58,0.25);
+            --prev: #E5243B;
+            --next: #4C9F38;
+            --bg: #07090f;
+            --surface: rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f0;
+            --muted: rgba(255,255,255,0.45);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        /* Background */
+        body::before {
+            content: '';
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 60% 50% at 80% 10%, rgba(221,166,58,0.10) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 40% at 10% 80%, rgba(221,166,58,0.06) 0%, transparent 60%),
+                radial-gradient(ellipse 80% 60% at 50% 50%, rgba(20,15,5,0.8) 0%, transparent 100%);
+        }
+
+        /* SDG stripe */
+        .color-stripe {
+            position: fixed; top: 0; left: 0; right: 0; height: 5px; z-index: 200;
+            background: linear-gradient(90deg,
+                #E5243B 5.88%,#DDA63A 11.76%,#4C9F38 17.64%,#C5192D 23.52%,
+                #FF3A21 29.4%,#26BDE2 35.28%,#FCC30B 41.16%,#A21942 47.04%,
+                #FD6925 52.92%,#DD1367 58.8%,#FD9D24 64.68%,#BF8B2E 70.56%,
+                #3F7E44 76.44%,#0A97D9 82.32%,#56C02B 88.2%,#00689D 94.08%,#19486A 100%);
+            animation: shimmer 4s ease-in-out infinite alternate;
+        }
+        @keyframes shimmer { from{filter:brightness(1)} to{filter:brightness(1.4)} }
+
+        /* Top nav */
+        .topnav {
+            position: fixed; top: 12px; left: 0; right: 0;
+            z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 32px;
+            pointer-events: none;
+        }
+        .topnav a { pointer-events: all; }
+
+        .nav-pill {
+            display: inline-flex; align-items: center; gap: 7px;
+            background: rgba(10,10,20,0.7);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            border-radius: 100px;
+            padding: 7px 16px;
+            font-size: 12px; font-weight: 500;
+            color: var(--muted);
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .nav-pill:hover { color: var(--text); border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.08); }
+        .nav-sdg-pills { display: flex; gap: 8px; }
+        .nav-pill.prev:hover { background: rgba(229,36,59,0.12); border-color: var(--prev); color: var(--prev); }
+        .nav-pill.next:hover { background: rgba(76,159,56,0.12); border-color: var(--next); color: var(--next); }
+
+        /* Hero */
+        .hero {
+            position: relative; z-index: 1;
+            min-height: 100vh;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: center;
+            padding: 120px 80px 80px;
+            overflow: hidden;
+        }
+
+        .hero-bg-num {
+            position: absolute;
+            right: -0.05em; top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 55vw;
+            line-height: 1;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(221,166,58,0.07);
+            pointer-events: none;
+            user-select: none;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-left {
+            position: relative; z-index: 2;
+            animation: fadeLeft 0.8s ease both;
+        }
+        @keyframes fadeLeft { from{opacity:0;transform:translateX(-30px)} to{opacity:1;transform:translateX(0)} }
+
+        .sdg-label {
+            display: inline-flex; align-items: center; gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .sdg-badge {
+            width: 48px; height: 48px;
+            background: var(--sdg);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 22px; color: #1a0f00;
+            box-shadow: 0 0 30px var(--sdg-glow);
+        }
+
+        .sdg-label-text {
+            font-size: 11px; letter-spacing: 2.5px;
+            text-transform: uppercase; color: var(--sdg);
+            font-weight: 600;
+        }
+
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(52px, 6vw, 88px);
+            line-height: 0.95;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+            background: linear-gradient(150deg, #fff 0%, rgba(255,255,255,0.55) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-desc {
+            font-size: 16px;
+            color: var(--muted);
+            max-width: 480px;
+            line-height: 1.75;
+            margin-bottom: 36px;
+        }
+
+        .stat-row { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        .stat-chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 20px;
+            transition: border-color 0.2s;
+        }
+        .stat-chip:hover { border-color: var(--sdg); }
+        .stat-chip .num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--sdg); line-height: 1; }
+        .stat-chip .label { font-size: 11px; color: var(--muted); margin-top: 3px; letter-spacing: 0.3px; }
+
+        /* Hero image */
+        .hero-right {
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            animation: fadeRight 0.8s ease 0.2s both;
+        }
+        @keyframes fadeRight { from{opacity:0;transform:translateX(30px)} to{opacity:1;transform:translateX(0)} }
+
+        .img-card { position: relative; width: min(340px, 90%); }
+
+        .img-card::before {
+            content: '';
+            position: absolute; inset: -2px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--sdg), transparent 60%);
+            z-index: -1; opacity: 0.6;
+        }
+
+        .img-card img {
+            width: 100%; border-radius: 22px; display: block;
+            box-shadow: 0 24px 60px rgba(221,166,58,0.2), 0 4px 16px rgba(0,0,0,0.4);
+        }
+
+        .img-card .img-tag {
+            position: absolute; bottom: 16px; left: 16px;
+            background: rgba(10,10,20,0.85);
+            border: 1px solid rgba(221,166,58,0.3);
+            backdrop-filter: blur(10px);
+            border-radius: 8px; padding: 6px 12px;
+            font-size: 11px; color: var(--sdg);
+            letter-spacing: 1px; font-weight: 600; text-transform: uppercase;
+        }
+
+        /* Content */
+        .content-wrap {
+            position: relative; z-index: 1;
+            max-width: 1100px; margin: 0 auto;
+            padding: 0 80px 120px;
+        }
+
+        .section-divider {
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border) 30%, var(--border) 70%, transparent);
+            margin: 0 0 64px;
+        }
+
+        .section-label {
+            font-size: 10px; letter-spacing: 3px;
+            text-transform: uppercase; color: var(--sdg);
+            font-weight: 600; margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(28px, 3vw, 42px);
+            letter-spacing: 1px; margin-bottom: 32px;
+            color: var(--text);
+        }
+
+        /* Target cards */
+        .targets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px; margin-bottom: 72px;
+            animation: fadeUp 0.6s ease 0.3s both;
+        }
+        @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+        .target-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px; padding: 22px;
+            position: relative; overflow: hidden;
+            transition: border-color 0.25s, transform 0.25s;
+        }
+        .target-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+            background: var(--sdg); opacity: 0; transition: opacity 0.25s;
+        }
+        .target-card:hover { border-color: rgba(221,166,58,0.35); transform: translateY(-2px); }
+        .target-card:hover::before { opacity: 1; }
+        .target-icon { font-size: 22px; margin-bottom: 12px; }
+        .target-text { font-size: 14px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+
+        /* Why block */
+        .why-block {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--sdg);
+            border-radius: 0 16px 16px 0;
+            padding: 32px 36px; margin-bottom: 72px;
+            animation: fadeUp 0.6s ease 0.4s both;
+        }
+        .why-block p { font-size: 16px; color: rgba(255,255,255,0.7); line-height: 1.8; }
+
+        /* Video */
+        .video-wrap { animation: fadeUp 0.6s ease 0.5s both; margin-bottom: 72px; }
+
+        .video-frame {
+            position: relative; width: 100%; max-width: 720px;
+            margin: 0 auto; border-radius: 16px; overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+        .video-frame::before {
+            content: ''; position: absolute; inset: -1px; border-radius: 17px;
+            background: linear-gradient(135deg, rgba(221,166,58,0.3), transparent 50%);
+            pointer-events: none; z-index: 1;
+        }
+        .video-frame iframe { display: block; width: 100%; height: 405px; border: none; }
+        .video-caption { text-align: center; font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+        /* Bottom nav */
+        .bottom-nav {
+            position: relative; z-index: 1;
+            display: flex; align-items: center; justify-content: space-between;
+            max-width: 1100px; margin: 0 auto;
+            padding: 0 80px 80px;
+            animation: fadeUp 0.6s ease 0.6s both;
+        }
+
+        .bnav-btn {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px; padding: 16px 24px;
+            text-decoration: none; color: var(--text);
+            transition: all 0.25s; min-width: 180px;
+        }
+        .bnav-btn:hover { transform: translateY(-2px); }
+        .bnav-btn.prev:hover { border-color: var(--prev); background: rgba(229,36,59,0.12); }
+        .bnav-btn.next:hover { border-color: var(--next); background: rgba(76,159,56,0.12); }
+
+        .bnav-dot {
+            width: 36px; height: 36px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Bebas Neue', sans-serif; font-size: 18px;
+        }
+        .bnav-btn.prev .bnav-dot { background: rgba(229,36,59,0.15); color: var(--prev); }
+        .bnav-btn.next .bnav-dot { background: rgba(76,159,56,0.15); color: var(--next); }
+
+        .bnav-info .dir { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+        .bnav-info .name { font-size: 14px; font-weight: 500; margin-top: 2px; }
+
+        .bnav-home {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            text-decoration: none; color: var(--muted);
+            font-size: 12px; letter-spacing: 1px; text-transform: uppercase;
+            transition: color 0.2s;
+        }
+        .bnav-home:hover { color: var(--text); }
+        .bnav-home .home-icon { font-size: 22px; }
+
+        footer {
+            position: relative; z-index: 1;
+            text-align: center; padding: 24px;
+            border-top: 1px solid var(--border);
+            font-size: 12px; color: var(--muted); letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 900px) {
+            .hero { grid-template-columns: 1fr; padding: 100px 24px 60px; }
+            .hero-right { display: none; }
+            .hero-bg-num { font-size: 80vw; right: -0.1em; }
+            .content-wrap { padding: 0 24px 80px; }
+            .bottom-nav { padding: 0 24px 60px; gap: 12px; flex-wrap: wrap; justify-content: center; }
+            .bnav-btn { min-width: 140px; }
+            .topnav { padding: 0 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="color-stripe"></div>
+
+<nav class="topnav">
+    <a href="Main-page.html" class="nav-pill home">← Home</a>
+    <div class="nav-sdg-pills">
+        <a href="sdg1.html" class="nav-pill prev">← SDG 1</a>
+        <a href="sdg3.html" class="nav-pill next">SDG 3 →</a>
+    </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+    <div class="hero-bg-num">2</div>
+
+    <div class="hero-left">
+        <div class="sdg-label">
+            <div class="sdg-badge">2</div>
+            <span class="sdg-label-text">Sustainable Development Goal</span>
+        </div>
+
+        <h1 class="hero-title">Zero<br>Hunger</h1>
+
+        <p class="hero-desc">
+            SDG 2 aims to end hunger and ensure everyone has access to sufficient, safe, and nutritious food year-round by 2030 —
+            while promoting sustainable agriculture and empowering small-scale farmers worldwide.
+        </p>
+
+        <div class="stat-row">
+            <div class="stat-chip">
+                <div class="num">733M</div>
+                <div class="label">People facing hunger</div>
+            </div>
+            <div class="stat-chip">
+                <div class="num">2030</div>
+                <div class="label">Target year</div>
+            </div>
+            <div class="stat-chip">
+                <div class="num">3.1B</div>
+                <div class="label">Can't afford healthy food</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hero-right">
+        <div class="img-card">
+            <img src="https://www.monash.edu/__data/assets/image/0003/1442730/E_SDG-goals_icons-individual-rgb-02.png" alt="SDG 2: Zero Hunger">
+            <div class="img-tag">SDG 2 · Zero Hunger</div>
+        </div>
+    </div>
+</section>
+
+<!-- Content -->
+<div class="content-wrap">
+    <div class="section-divider"></div>
+
+    <div class="section-label">Key Targets</div>
+    <h2 class="section-title">What SDG 2 Aims to Achieve</h2>
+
+    <div class="targets-grid">
+        <div class="target-card">
+            <div class="target-icon">🍽️</div>
+            <p class="target-text">End all forms of hunger and ensure access to safe, nutritious, and sufficient food year-round.</p>
+        </div>
+        <div class="target-card">
+            <div class="target-icon">🧒</div>
+            <p class="target-text">End all forms of malnutrition, including stunting and wasting in children under 5 years of age.</p>
+        </div>
+        <div class="target-card">
+            <div class="target-icon">🌾</div>
+            <p class="target-text">Double the agricultural productivity and incomes of small-scale food producers globally.</p>
+        </div>
+        <div class="target-card">
+            <div class="target-icon">♻️</div>
+            <p class="target-text">Promote sustainable food production systems and resilient agricultural practices.</p>
+        </div>
+        <div class="target-card">
+            <div class="target-icon">🌱</div>
+            <p class="target-text">Maintain the genetic diversity of seeds, cultivated plants, and farmed animals.</p>
+        </div>
+        <div class="target-card">
+            <div class="target-icon">📊</div>
+            <p class="target-text">Correct trade restrictions and distortions in global agricultural markets.</p>
+        </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-label">Why It Matters</div>
+    <h2 class="section-title">Food Security for a Stable World</h2>
+
+    <div class="why-block">
+        <p>
+            Hunger and malnutrition have profound effects on individuals and communities — leading to health crises,
+            reduced cognitive development, lost productivity, and social instability. When people lack access to
+            nutritious food, every other development goal suffers. Sustainable agriculture is not just about growing more food;
+            it's about growing it smarter, fairer, and in ways that protect our planet for future generations.
+            Achieving Zero Hunger is inseparable from ending poverty, improving health, and combating climate change.
+        </p>
+    </div>
+
+    <div class="section-divider"></div>
+    <div class="section-label">Learn More</div>
+    <h2 class="section-title">Watch: SDG 2 Explained</h2>
+
+    <div class="video-wrap">
+        <div class="video-frame">
+            <iframe
+                src="https://www.youtube.com/embed/OQUbURbcrXo?si=OLa09Iu0KlfBuGdR"
+                title="SDG 2: Zero Hunger"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+            </iframe>
+        </div>
+        <p class="video-caption">Official United Nations · SDG 2: Zero Hunger</p>
+    </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+    <a href="sdg1.html" class="bnav-btn prev">
+        <div class="bnav-dot">1</div>
+        <div class="bnav-info">
+            <div class="dir">← Previous</div>
+            <div class="name">No Poverty</div>
+        </div>
+    </a>
+
+    <a href="Main-page.html" class="bnav-home">
+        <span class="home-icon">🌍</span>
+        <span>All Goals</span>
+    </a>
+
+    <a href="sdg3.html" class="bnav-btn next">
+        <div class="bnav-info" style="text-align:right">
+            <div class="dir">Next →</div>
+            <div class="name">Good Health</div>
+        </div>
+        <div class="bnav-dot">3</div>
+    </a>
+</nav>
+
+<footer>
+    <p>© 2024 Sustainable Development Goals Initiative · United Nations</p>
+</footer>
+
+</body>
+</html>

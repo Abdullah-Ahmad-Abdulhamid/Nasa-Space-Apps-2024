@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDGs Quiz</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sdg1: #E5243B; --sdg2: #DDA63A; --sdg3: #4C9F38; --sdg4: #C5192D;
+            --sdg5: #FF3A21; --sdg6: #26BDE2; --sdg7: #FCC30B; --sdg8: #A21942;
+            --sdg9: #FD6925; --sdg10: #DD1367; --sdg11: #FD9D24; --sdg12: #BF8B2E;
+            --sdg13: #3F7E44; --sdg14: #0A97D9; --sdg15: #56C02B; --sdg16: #00689D;
+            --sdg17: #19486A;
+            --bg: #0d0d0d;
+            --surface: #161616;
+            --border: rgba(255,255,255,0.08);
+            --text: #f0f0f0;
+            --muted: #888;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated SDG color stripe at top */
+        .color-stripe {
+            height: 6px;
+            width: 100%;
+            background: linear-gradient(90deg,
+                #E5243B 5.88%, #DDA63A 11.76%, #4C9F38 17.64%, #C5192D 23.52%,
+                #FF3A21 29.4%, #26BDE2 35.28%, #FCC30B 41.16%, #A21942 47.04%,
+                #FD6925 52.92%, #DD1367 58.8%, #FD9D24 64.68%, #BF8B2E 70.56%,
+                #3F7E44 76.44%, #0A97D9 82.32%, #56C02B 88.2%, #00689D 94.08%, #19486A 100%);
+            position: fixed; top: 0; left: 0; z-index: 100;
+            animation: stripeGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes stripeGlow {
+            from { filter: brightness(1); }
+            to { filter: brightness(1.3); }
+        }
+
+        /* Background pattern */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image:
+                radial-gradient(circle at 15% 20%, rgba(38,189,226,0.07) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(229,36,59,0.07) 0%, transparent 40%),
+                radial-gradient(circle at 50% 50%, rgba(76,159,56,0.04) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+
+        .container {
+            position: relative; z-index: 1;
+            max-width: 780px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin: 60px 0 48px;
+            animation: fadeDown 0.8s ease;
+        }
+
+        @keyframes fadeDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .un-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            padding: 6px 16px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .un-badge span { color: #26BDE2; }
+
+        h1 {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(42px, 8vw, 72px);
+            letter-spacing: 2px;
+            line-height: 1;
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: 14px;
+            letter-spacing: 0.5px;
+        }
+
+        /* SDG mini icons strip */
+        .sdg-strip {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            margin: 24px 0 0;
+            flex-wrap: wrap;
+        }
+
+        .sdg-dot {
+            width: 18px; height: 18px;
+            border-radius: 4px;
+            opacity: 0.7;
+            transition: all 0.2s;
+        }
+
+        .sdg-dot:hover { opacity: 1; transform: scale(1.3); }
+
+        /* Nav button */
+        .home-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--muted);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            transition: all 0.2s;
+            position: fixed;
+            top: 24px; left: 24px;
+            z-index: 99;
+        }
+
+        .home-button:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* Progress */
+        .progress-bar-wrap {
+            background: rgba(255,255,255,0.06);
+            border-radius: 100px;
+            height: 4px;
+            margin-bottom: 36px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #26BDE2, #4C9F38);
+            border-radius: 100px;
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .progress-label {
+            font-size: 12px;
+            color: var(--muted);
+            text-align: right;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Questions */
+        .question {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.3s, transform 0.2s;
+            animation: fadeUp 0.5s ease both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question:nth-child(1)  { animation-delay: 0.05s; }
+        .question:nth-child(2)  { animation-delay: 0.10s; }
+        .question:nth-child(3)  { animation-delay: 0.15s; }
+        .question:nth-child(4)  { animation-delay: 0.20s; }
+        .question:nth-child(5)  { animation-delay: 0.25s; }
+        .question:nth-child(6)  { animation-delay: 0.30s; }
+        .question:nth-child(7)  { animation-delay: 0.35s; }
+        .question:nth-child(8)  { animation-delay: 0.40s; }
+        .question:nth-child(9)  { animation-delay: 0.45s; }
+        .question:nth-child(10) { animation-delay: 0.50s; }
+
+        /* Left accent bar using SDG colors */
+        .question::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 4px;
+            border-radius: 4px 0 0 4px;
+        }
+
+        .question:nth-child(1)::before  { background: var(--sdg1); }
+        .question:nth-child(2)::before  { background: var(--sdg2); }
+        .question:nth-child(3)::before  { background: var(--sdg5); }
+        .question:nth-child(4)::before  { background: var(--sdg6); }
+        .question:nth-child(5)::before  { background: var(--sdg7); }
+        .question:nth-child(6)::before  { background: var(--sdg13); }
+        .question:nth-child(7)::before  { background: var(--sdg8); }
+        .question:nth-child(8)::before  { background: var(--sdg17); }
+        .question:nth-child(9)::before  { background: var(--sdg14); }
+        .question:nth-child(10)::before { background: var(--sdg17); }
+
+        .question:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+
+        .question.answered { border-color: rgba(38,189,226,0.3); }
+
+        .question-num {
+            font-size: 11px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .question label {
+            display: block;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        /* Custom radio buttons */
+        .options {
+            display: flex;
+            gap: 12px;
+        }
+
+        .option-label {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            user-select: none;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .option-label input[type="radio"] { display: none; }
+
+        .option-label .radio-circle {
+            width: 16px; height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            flex-shrink: 0;
+            transition: all 0.2s;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .option-label:hover {
+            border-color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.07);
+        }
+
+        .option-label.true-option:hover { border-color: #4C9F38; background: rgba(76,159,56,0.08); }
+        .option-label.false-option:hover { border-color: #E5243B; background: rgba(229,36,59,0.08); }
+
+        .option-label input:checked ~ .radio-circle {
+            border-color: currentColor;
+            background: currentColor;
+        }
+
+        .option-label input:checked ~ .radio-circle::after {
+            content: '';
+            width: 6px; height: 6px;
+            background: #0d0d0d;
+            border-radius: 50%;
+        }
+
+        .option-label.true-option { color: #4C9F38; }
+        .option-label.false-option { color: #E5243B; }
+
+        .option-label input:checked + span + .radio-circle,
+        .option-label:has(input:checked) {
+            font-weight: 600;
+        }
+
+        .option-label.true-option:has(input:checked) {
+            border-color: #4C9F38;
+            background: rgba(76,159,56,0.12);
+        }
+
+        .option-label.false-option:has(input:checked) {
+            border-color: #E5243B;
+            background: rgba(229,36,59,0.12);
+        }
+
+        /* Buttons */
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #26BDE2, #4C9F38);
+            color: #fff;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(38,189,226,0.3);
+        }
+
+        .btn-retry {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border);
+            color: var(--muted);
+        }
+
+        .btn-retry:hover {
+            background: rgba(255,255,255,0.1);
+            color: var(--text);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        /* Result */
+        .result {
+            margin-top: 32px;
+            display: none;
+            animation: fadeUp 0.5s ease;
+        }
+
+        .result.show { display: block; }
+
+        .result-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #26BDE2, #4C9F38, #FCC30B, #E5243B);
+        }
+
+        .score-number {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 96px;
+            line-height: 1;
+            background: linear-gradient(135deg, #26BDE2, #4C9F38);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .score-label {
+            color: var(--muted);
+            font-size: 13px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+
+        .result-message {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .sdg-emoji { font-size: 32px; margin-bottom: 12px; display: block; }
+
+        /* Feedback states for questions */
+        .question.correct::after {
+            content: '✓';
+            position: absolute;
+            top: 16px; right: 16px;
+            color: #4C9F38;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question.incorrect::after {
+            content: '✗';
+            position: absolute;
+            top: 16px; right: 16px;
+            color: #E5243B;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question.correct { border-color: rgba(76,159,56,0.4); }
+        .question.incorrect { border-color: rgba(229,36,59,0.4); }
+    </style>
+</head>
+<body>
+
+<div class="color-stripe"></div>
+
+<a href="Main-page.html" class="home-button">
+    ← Home
+</a>
+
+<div class="container">
+
+    <div class="header">
+        <div class="un-badge">🌍 <span>United Nations</span> · Sustainable Development Goals</div>
+        <h1>SDGs Quiz</h1>
+        <p class="subtitle">Test your knowledge on the 17 Global Goals · 10 Questions</p>
+        <div class="sdg-strip">
+            <div class="sdg-dot" style="background:#E5243B" title="SDG 1"></div>
+            <div class="sdg-dot" style="background:#DDA63A" title="SDG 2"></div>
+            <div class="sdg-dot" style="background:#4C9F38" title="SDG 3"></div>
+            <div class="sdg-dot" style="background:#C5192D" title="SDG 4"></div>
+            <div class="sdg-dot" style="background:#FF3A21" title="SDG 5"></div>
+            <div class="sdg-dot" style="background:#26BDE2" title="SDG 6"></div>
+            <div class="sdg-dot" style="background:#FCC30B" title="SDG 7"></div>
+            <div class="sdg-dot" style="background:#A21942" title="SDG 8"></div>
+            <div class="sdg-dot" style="background:#FD6925" title="SDG 9"></div>
+            <div class="sdg-dot" style="background:#DD1367" title="SDG 10"></div>
+            <div class="sdg-dot" style="background:#FD9D24" title="SDG 11"></div>
+            <div class="sdg-dot" style="background:#BF8B2E" title="SDG 12"></div>
+            <div class="sdg-dot" style="background:#3F7E44" title="SDG 13"></div>
+            <div class="sdg-dot" style="background:#0A97D9" title="SDG 14"></div>
+            <div class="sdg-dot" style="background:#56C02B" title="SDG 15"></div>
+            <div class="sdg-dot" style="background:#00689D" title="SDG 16"></div>
+            <div class="sdg-dot" style="background:#19486A" title="SDG 17"></div>
+        </div>
+    </div>
+
+    <div class="progress-label" id="progressLabel">0 of 10 answered</div>
+    <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="progressBar"></div>
+    </div>
+
+    <form id="quizForm">
+
+        <div class="question" id="q1-block">
+            <div class="question-num">Question 01 · SDG 1</div>
+            <label>The first SDG is to end poverty in all its forms everywhere.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q1" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q1" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q2-block">
+            <div class="question-num">Question 02 · SDG 2</div>
+            <label>SDG 2 focuses on ending hunger and achieving food security.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q2" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q2" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q3-block">
+            <div class="question-num">Question 03 · SDG 5</div>
+            <label>Gender equality is not one of the Sustainable Development Goals.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q3" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q3" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q4-block">
+            <div class="question-num">Question 04 · SDG 6</div>
+            <label>SDG 6 promotes clean water and sanitation for all.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q4" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q4" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q5-block">
+            <div class="question-num">Question 05 · SDG 7</div>
+            <label>Affordable and clean energy is covered under SDG 7.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q5" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q5" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q6-block">
+            <div class="question-num">Question 06 · SDG 13</div>
+            <label>The SDGs do not address climate action.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q6" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q6" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q7-block">
+            <div class="question-num">Question 07 · SDG 8</div>
+            <label>SDG 8 promotes sustained, inclusive, and sustainable economic growth.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q7" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q7" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q8-block">
+            <div class="question-num">Question 08 · All SDGs</div>
+            <label>There are 20 Sustainable Development Goals in total.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q8" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q8" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q9-block">
+            <div class="question-num">Question 09 · SDG 14</div>
+            <label>SDG 14 focuses on life below water.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q9" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q9" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="question" id="q10-block">
+            <div class="question-num">Question 10 · SDG 17</div>
+            <label>SDG 17 encourages partnerships for the goals.</label>
+            <div class="options">
+                <label class="option-label true-option">
+                    <input type="radio" name="q10" value="true" onchange="updateProgress()">
+                    <span>True</span>
+                    <div class="radio-circle"></div>
+                </label>
+                <label class="option-label false-option">
+                    <input type="radio" name="q10" value="false" onchange="updateProgress()">
+                    <span>False</span>
+                    <div class="radio-circle"></div>
+                </label>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button type="button" class="btn btn-submit" onclick="calculateScore()">Submit Quiz</button>
+            <button type="button" class="btn btn-retry" onclick="retryQuiz()">↺ Retry</button>
+        </div>
+    </form>
+
+    <div id="result" class="result">
+        <div class="result-card">
+            <span class="sdg-emoji" id="resultEmoji">🌍</span>
+            <div class="score-number" id="scoreNumber">0</div>
+            <div class="score-label">out of 10</div>
+            <div class="result-message" id="resultMessage"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const correctAnswers = {
+        q1: 'true', q2: 'true', q3: 'false', q4: 'true', q5: 'true',
+        q6: 'false', q7: 'true', q8: 'false', q9: 'true', q10: 'true'
+    };
+
+    function updateProgress() {
+        let answered = 0;
+        for (let i = 1; i <= 10; i++) {
+            const sel = document.querySelector(`input[name="q${i}"]:checked`);
+            const block = document.getElementById(`q${i}-block`);
+            if (sel) {
+                answered++;
+                block.classList.add('answered');
+            }
+        }
+        document.getElementById('progressBar').style.width = (answered / 10 * 100) + '%';
+        document.getElementById('progressLabel').textContent = `${answered} of 10 answered`;
+    }
+
+    function calculateScore() {
+        let score = 0;
+        for (let i = 1; i <= 10; i++) {
+            const sel = document.querySelector(`input[name="q${i}"]:checked`);
+            const block = document.getElementById(`q${i}-block`);
+            block.classList.remove('correct', 'incorrect');
+            if (sel) {
+                if (sel.value === correctAnswers[`q${i}`]) {
+                    score++;
+                    block.classList.add('correct');
+                } else {
+                    block.classList.add('incorrect');
+                }
+            } else {
+                block.classList.add('incorrect');
+            }
+        }
+
+        document.getElementById('scoreNumber').textContent = score;
+
+        let emoji, message;
+        if (score === 10) {
+            emoji = '🏆'; message = 'Perfect score! You are a true SDGs champion.';
+        } else if (score >= 7) {
+            emoji = '🌟'; message = 'Excellent! You have a strong understanding of the Global Goals.';
+        } else if (score >= 5) {
+            emoji = '🌱'; message = 'Good effort! Keep learning and growing your SDG knowledge.';
+        } else {
+            emoji = '📚'; message = 'Keep going! Study the 17 SDGs and try again — every goal matters.';
+        }
+
+        document.getElementById('resultEmoji').textContent = emoji;
+        document.getElementById('resultMessage').textContent = message;
+
+        const resultDiv = document.getElementById('result');
+        resultDiv.classList.add('show');
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function retryQuiz() {
+        document.getElementById('quizForm').reset();
+        document.getElementById('result').classList.remove('show');
+        document.getElementById('progressBar').style.width = '0%';
+        document.getElementById('progressLabel').textContent = '0 of 10 answered';
+        for (let i = 1; i <= 10; i++) {
+            const block = document.getElementById(`q${i}-block`);
+            block.classList.remove('correct', 'incorrect', 'answered');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+</body>
+</html>
